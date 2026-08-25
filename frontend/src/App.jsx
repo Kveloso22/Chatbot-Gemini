@@ -42,7 +42,7 @@ function App() {
     }]);
 
     try {
-      // ✅ AHORA USA API_URL en lugar de localhost
+      // ✅ AHORA USA API_URL
       const response = await axios.post(`${API_URL}/chat/`, {
         mensaje: userMessage,
       });
