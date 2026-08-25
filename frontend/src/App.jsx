@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
+// ✅ CONFIGURACIÓN: Usa la variable de entorno para la URL del backend
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Verificar que la variable esté definida
+if (!API_URL) {
+  console.error('❌ VITE_API_URL no está definida. Configura esta variable en Cloudflare Pages.');
+}
+
 function App() {
   const [message, setMessage] = useState('');
   const [chatLog, setChatLog] = useState([]);
@@ -14,6 +22,15 @@ function App() {
   const sendMessage = async () => {
     if (!message.trim() || isLoading) return;
 
+    if (!API_URL) {
+      setChatLog(prev => [...prev, {
+        sender: 'bot',
+        text: '❌ Error: VITE_API_URL no configurada',
+        timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+      }]);
+      return;
+    }
+
     const userMessage = message.trim();
     setMessage('');
     setIsLoading(true);
@@ -25,7 +42,8 @@ function App() {
     }]);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/chat/', {
+      // ✅ AHORA USA API_URL en lugar de localhost
+      const response = await axios.post(`${API_URL}/chat/`, {
         mensaje: userMessage,
       });
 
@@ -36,9 +54,15 @@ function App() {
       }]);
     } catch (error) {
       console.error('Error:', error);
+      let mensajeError = '⚠️ Error de conexión. Intenta de nuevo.';
+      if (error.response) {
+        mensajeError = `⚠️ Error ${error.response.status}: ${error.response.data?.error || 'Error del servidor'}`;
+      } else if (error.request) {
+        mensajeError = '⚠️ No se pudo conectar con el servidor. Verifica tu conexión.';
+      }
       setChatLog(prev => [...prev, {
         sender: 'bot',
-        text: '⚠️ Error de conexión. Intenta de nuevo.',
+        text: mensajeError,
         timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
       }]);
     } finally {
@@ -57,7 +81,6 @@ function App() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl h-[650px] flex flex-col overflow-hidden">
         
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-800 via-indigo-800 to-blue-800 p-5 text-white flex items-center gap-4">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl backdrop-blur-sm">
             🤖
@@ -74,7 +97,6 @@ function App() {
           </div>
         </div>
 
-        {/* Chat log */}
         <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-gray-50 scrollbar-thin">
           {chatLog.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center text-gray-400">
@@ -126,7 +148,6 @@ function App() {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Input */}
         <div className="p-4 bg-white border-t border-gray-200">
           <div className="flex gap-3">
             <input
