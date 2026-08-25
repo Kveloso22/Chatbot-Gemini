@@ -8,7 +8,6 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
-dist/
 build/
 *.log
 *.sqlite3
