@@ -22,7 +22,6 @@ db.sqlite3
 
 # ===== NODE =====
 frontend/node_modules/
-frontend/dist/
 frontend/.vite/
 frontend/*.log
 frontend/package-lock.json
