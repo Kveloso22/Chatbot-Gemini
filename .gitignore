@@ -43,3 +43,4 @@ coverage/
 htmlcov/
 .pytest_cache/
 staticfiles/
+media/
